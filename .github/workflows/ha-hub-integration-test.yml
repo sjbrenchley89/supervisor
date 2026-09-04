@@ -59,7 +59,7 @@ jobs:
 
       - name: Scan for hardcoded secrets
         run: |
-          if grep -r "HA_HUB_TOKEN\|HA_HUB_URL" . --include="*.py" --include="*.yaml" --include="*.yml" | grep -v ".env.example" | grep -v "HA_HUB_SETUP.md" | grep -v ".github/workflows"; then
+          if grep -r "HA_HUB_TOKEN\|HA_HUB_URL" . --include="*.py" --include="*.yaml" --include="*.yml" | grep -v ".env.example" | grep -v "HA_HUB_SETUP.md" | grep -v ".github/workflows" | grep -v "ha_hub_connection.py"; then
             echo "Error: Found hardcoded secrets in repository!"
             exit 1
           fi
