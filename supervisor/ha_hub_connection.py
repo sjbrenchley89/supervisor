@@ -60,8 +60,9 @@ class HAHubConfig:
                 assert self._url is not None
                 assert self._token is not None
                 headers = {"Authorization": f"Bearer {self._token}"}
+                timeout = aiohttp.ClientTimeout(total=5)
                 async with session.get(
-                    f"{self._url}/api/", headers=headers, timeout=aiohttp.ClientTimeout(total=5)
+                    f"{self._url}/api/", headers=headers, timeout=timeout
                 ) as response:
                     return response.status == 200
         except Exception:
