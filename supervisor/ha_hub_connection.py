@@ -56,9 +56,12 @@ class HAHubConfig:
 
         try:
             async with aiohttp.ClientSession() as session:
+                # Type assertions for mypy: is_configured ensures these are not None
+                assert self._url is not None
+                assert self._token is not None
                 headers = {"Authorization": f"Bearer {self._token}"}
                 async with session.get(
-                    f"{self._url}/api/", headers=headers, timeout=5
+                    f"{self._url}/api/", headers=headers, timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
                     return response.status == 200
         except Exception:
