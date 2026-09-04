@@ -1,7 +1,8 @@
 """Home Assistant Hub Connection Configuration."""
 
 import os
-from typing import Optional
+
+import aiohttp
 
 from .exceptions import HassioError
 
@@ -9,10 +10,10 @@ from .exceptions import HassioError
 class HAHubConfig:
     """Configuration for Home Assistant Hub connection."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Home Assistant Hub configuration."""
-        self._url: Optional[str] = None
-        self._token: Optional[str] = None
+        self._url: str | None = None
+        self._token: str | None = None
         self._load_from_env()
 
     def _load_from_env(self) -> None:
@@ -21,12 +22,12 @@ class HAHubConfig:
         self._token = os.getenv("HA_HUB_TOKEN")
 
     @property
-    def url(self) -> Optional[str]:
+    def url(self) -> str | None:
         """Return Home Assistant Hub URL."""
         return self._url
 
     @property
-    def token(self) -> Optional[str]:
+    def token(self) -> str | None:
         """Return Home Assistant Hub access token."""
         return self._token
 
@@ -54,8 +55,6 @@ class HAHubConfig:
             return False
 
         try:
-            import aiohttp
-
             async with aiohttp.ClientSession() as session:
                 headers = {"Authorization": f"Bearer {self._token}"}
                 async with session.get(
