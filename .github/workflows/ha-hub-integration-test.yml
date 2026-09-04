@@ -1,0 +1,66 @@
+name: Home Assistant Hub Integration Test
+
+on:
+  push:
+    branches:
+      - claude/home-assistant-hub-connect-*
+  pull_request:
+    branches:
+      - claude/home-assistant-hub-connect-*
+  workflow_dispatch:
+
+jobs:
+  test-ha-hub-connection:
+    runs-on: ubuntu-latest
+
+    env:
+      HA_HUB_URL: ${{ secrets.HA_HUB_URL }}
+      HA_HUB_TOKEN: ${{ secrets.HA_HUB_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.14'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check HA Hub Configuration
+        run: |
+          if [ -z "$HA_HUB_URL" ] || [ -z "$HA_HUB_TOKEN" ]; then
+            echo "Error: HA_HUB_URL and HA_HUB_TOKEN secrets are not configured."
+            echo "Please add them to your repository secrets."
+            exit 1
+          fi
+          echo "✓ HA_HUB_URL is configured"
+          echo "✓ HA_HUB_TOKEN is configured"
+
+      - name: Test Home Assistant Hub Connection
+        run: |
+          python -m pytest tests/integration/test_ha_hub_connection.py -v
+
+      - name: Run Integration Tests
+        run: |
+          python -m pytest tests/integration/ -v -k "ha_hub or home_assistant" --tb=short
+
+  # Optional: Security scan for secrets
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Scan for hardcoded secrets
+        run: |
+          if grep -r "HA_HUB_TOKEN\|HA_HUB_URL" . --include="*.py" --include="*.yaml" --include="*.yml" | grep -v ".env.example" | grep -v "HA_HUB_SETUP.md" | grep -v ".github/workflows"; then
+            echo "Error: Found hardcoded secrets in repository!"
+            exit 1
+          fi
+          echo "✓ No hardcoded secrets detected"
